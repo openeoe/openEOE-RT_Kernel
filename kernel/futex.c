@@ -962,9 +962,9 @@ static void exit_pi_state_list(struct task_struct *curr)
 		if (head->next != next) {
 			/* retain curr->pi_lock for the loop invariant */
 			raw_spin_unlock(&pi_state->pi_mutex.wait_lock);
-			raw_spin_unlock_irq(&curr->pi_lock);
+			// jgson raw_spin_unlock_irq(&curr->pi_lock);
 			spin_unlock(&hb->lock);
-			raw_spin_lock_irq(&curr->pi_lock);
+			// jgson raw_spin_lock_irq(&curr->pi_lock);
 			put_pi_state(pi_state);
 			continue;
 		}
@@ -3010,6 +3010,7 @@ retry_private:
 	 * before __rt_mutex_start_proxy_lock() is done.
 	 */
 	raw_spin_lock_irq(&q.pi_state->pi_mutex.wait_lock);
+#if  0 // jgson
 	/*
 	 * the migrate_disable() here disables migration in the in_atomic() fast
 	 * path which is enabled again in the following spin_unlock(). We have
@@ -3017,6 +3018,7 @@ retry_private:
 	 * after the raw_spin_unlock_irq() where we leave the atomic context.
 	 */
 	migrate_disable();
+#endif
 
 	spin_unlock(q.lock_ptr);
 	/*
@@ -3026,7 +3028,7 @@ retry_private:
 	 */
 	ret = __rt_mutex_start_proxy_lock(&q.pi_state->pi_mutex, &rt_waiter, current);
 	raw_spin_unlock_irq(&q.pi_state->pi_mutex.wait_lock);
-	migrate_enable();
+// jgson	migrate_enable();
 
 	if (ret) {
 		if (ret == 1)
@@ -3161,6 +3163,7 @@ retry:
 		 * rt_waiter. Also see the WARN in wake_futex_pi().
 		 */
 		raw_spin_lock_irq(&pi_state->pi_mutex.wait_lock);
+#if 0 // jgson
 		/*
 		 * Magic trickery for now to make the RT migrate disable
 		 * logic happy. The following spin_unlock() happens with
@@ -3169,11 +3172,14 @@ retry:
 		 * locking hb->lock.
 		 */
 		migrate_disable();
+#endif
 		spin_unlock(&hb->lock);
 
 		/* drops pi_state->pi_mutex.wait_lock */
 		ret = wake_futex_pi(uaddr, uval, pi_state);
+#if 0 // jgson
 		migrate_enable();
+#endif
 
 		put_pi_state(pi_state);
 

@@ -144,8 +144,9 @@ static void fixup_rt_mutex_waiters(struct rt_mutex *lock)
 
 static int rt_mutex_real_waiter(struct rt_mutex_waiter *waiter)
 {
-	return waiter && waiter != PI_WAKEUP_INPROGRESS &&
-		waiter != PI_REQUEUE_INPROGRESS;
+// jgson 	return waiter && waiter != PI_WAKEUP_INPROGRESS &&
+//		waiter != PI_REQUEUE_INPROGRESS;
+	return waiter && waiter != PI_WAKEUP_INPROGRESS;
 }
 
 /*
@@ -2375,6 +2376,7 @@ int __rt_mutex_start_proxy_lock(struct rt_mutex *lock,
 	if (try_to_take_rt_mutex(lock, task, NULL))
 		return 1;
 
+#if 0 // jgson
 #ifdef CONFIG_PREEMPT_RT_FULL
 	/*
 	 * In PREEMPT_RT there's an added race.
@@ -2402,6 +2404,7 @@ int __rt_mutex_start_proxy_lock(struct rt_mutex *lock,
 	task->pi_blocked_on = PI_REQUEUE_INPROGRESS;
 	raw_spin_unlock(&task->pi_lock);
 #endif
+#endif // jgson
 
 	/* We enforce deadlock detection for futexes */
 	ret = task_blocks_on_rt_mutex(lock, waiter, task,
